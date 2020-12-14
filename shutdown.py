@@ -15,4 +15,4 @@ def Shutdown(channel):
 GPIO.add_event_detect(SHUTDOWN_PIN, GPIO.FALLING, callback=Shutdown, bouncetime=2000)
 
 while 1:
-    time.sleep(1)
+    time.sleep(2)
