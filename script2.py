@@ -1,22 +1,31 @@
-import RPi.GPIO as GPIO
+import pigpio
 import time
 import signal
 import sys
 import os
+import simple_pid
+
+pi = pigpio.pi()
+pid = simple_pid.PID()
 
 # Configuration
 FAN_PIN = 18            # BCM pin used to drive PWM fan
-#SHUTDOWN_PIN = 22
-WAIT_TIME = 10           # [s] Time to wait between each refresh
-PWM_FREQ = 25000        # [Hz] 25kHz for Noctua PWM control
+WAIT_TIME = 1           # [s] Time to wait between each refresh
+pi.set_PWM_frequency(FAN_PIN, 20000)
+pi.set_PWM_range(FAN_PIN, 100)
+print("PWM Frequency: (2000?):", pi.get_PWM_frequency(FAN_PIN))
+pid.sample_time = WAIT_TIME
+pid.output_limits = (0, 100)
 
 # Configurable temperature and fan speed
 MIN_TEMP = 40
-MAX_TEMP = 70
+MAX_TEMP = 60
 FAN_LOW = 1
 FAN_HIGH = 100
 FAN_OFF = 0
 FAN_MAX = 100
+pid.setpoint = 35
+pid.tunings = (-4.0, 0.5, 0.1)
 
 # Get CPU's temperature
 def getCpuTemperature():
@@ -27,7 +36,7 @@ def getCpuTemperature():
 
 # Set fan speed
 def setFanSpeed(speed):
-    fan.start(speed)
+    pi.set_PWM_dutycycle(FAN_PIN, speed)
     return()
 
 # Handle fan speed
@@ -49,20 +58,20 @@ def handleFanSpeed():
         print(FAN_LOW + ( round(temp) * step )) # Uncomment for testing
     return ()
 
+def handleFanSpeed_PID():
+    temp = float(getCpuTemperature())
+    output = pid(temp)
+    setFanSpeed(output)
+    print("Fan Speed:",output)
+
 try:
-    # Setup GPIO pin
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(FAN_PIN, GPIO.OUT, initial=GPIO.LOW)
-#    GPIO.setup(SHUTDOWN_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-#    GPIO.add_event_detect(SHUTDOWN_PIN, GPIO.FALLING, callback=shutdown, bouncetime=2000)
-    fan = GPIO.PWM(FAN_PIN,PWM_FREQ)
     setFanSpeed(FAN_OFF)
     # Handle fan speed every WAIT_TIME sec
     while True:
+    #    handleFanSpeed_PID()
         handleFanSpeed()
         time.sleep(WAIT_TIME)
 
 except KeyboardInterrupt: # trap a CTRL+C keyboard interrupt
     setFanSpeed(FAN_HIGH)
-    #GPIO.cleanup() # resets all GPIO ports used by this function
+    pi.stop()
