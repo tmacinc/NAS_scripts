@@ -22,5 +22,6 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 47 6    * * 7   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.weekly )
 52 6    1 * *   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.monthly )
 #
+@reboot root /usr/bin/pigpiod
 @reboot root /usr/bin/python3 /var/python/script2.py
 @reboot root /usr/bin/python3 /var/python/shutdown.py

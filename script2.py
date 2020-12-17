@@ -68,10 +68,11 @@ try:
     setFanSpeed(FAN_OFF)
     # Handle fan speed every WAIT_TIME sec
     while True:
-    #    handleFanSpeed_PID()
         handleFanSpeed()
         time.sleep(WAIT_TIME)
 
 except KeyboardInterrupt: # trap a CTRL+C keyboard interrupt
-    setFanSpeed(FAN_HIGH)
+    setFanSpeed(10)
     pi.stop()
+
+
