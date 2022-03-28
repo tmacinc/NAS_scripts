@@ -21,7 +21,12 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 25 6    * * *   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.daily )
 47 6    * * 7   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.weekly )
 52 6    1 * *   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.monthly )
+50 3    * * 5   root    /usr/bin/apt update -q -y >> /var/log/apt/automaticupdates.log
+0  4    * * 5   root    /usr/bin/apt upgrade -q -y >> /var/log/apt/automaticupdates.log
+
 #
 @reboot root /usr/bin/pigpiod
 @reboot root /usr/bin/python3 /var/python/script2.py
 @reboot root /usr/bin/python3 /var/python/shutdown.py
+
+
